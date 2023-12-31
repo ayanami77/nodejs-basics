@@ -1,8 +1,10 @@
+const express = require("express");
+const http = require("http");
+const fs = require("fs");
+
 const PORT = 3000;
 
-const express = require("express");
 const app = express();
-const http = require("http");
 const server = http.createServer(app);
 const io = require("socket.io")(server);
 
@@ -15,6 +17,7 @@ io.on("connection", (socket) => {
 
   socket.on("chat message", (msg) => {
     // クライアントサイドへもういちど送信
+    writeLogFile(msg);
     io.emit("chat message", msg);
   });
 });
@@ -22,3 +25,12 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log("server is running");
 });
+
+function writeLogFile(msg) {
+  fs.appendFile("./chat-log/log.txt", `${msg}\n`, (err) => {
+    if (err) {
+      console.log("ログの書き込みに失敗しました。");
+      throw err;
+    }
+  });
+}
